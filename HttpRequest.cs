@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Networking;
 
 namespace DUCK.Http
@@ -9,6 +10,7 @@ namespace DUCK.Http
 		public UnityWebRequest UnityWebRequest { get; private set; }
 
 		private readonly Dictionary<string, string> headers;
+		private Coroutine coroutine;
 
 		public HttpRequest(UnityWebRequest unityWebRequest)
 		{
@@ -44,7 +46,20 @@ namespace DUCK.Http
 				UnityWebRequest.SetRequestHeader(header.Key, header.Value);
 			}
 
-			Http.Instance.Send(this, onSuccess, onError);
+			coroutine = Http.Instance.Send(this, onSuccess, onError);
+		}
+
+		public void Abort()
+		{
+			if (UnityWebRequest != null && !UnityWebRequest.isDone)
+			{
+				UnityWebRequest.Abort();
+			}
+
+			if (coroutine != null)
+			{
+				Http.Instance.Abort(coroutine);
+			}
 		}
 	}
 }
