@@ -1,35 +1,72 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Networking;
 
 namespace DUCK.Http
 {
 	public class HttpRequest
 	{
-		public UnityWebRequest UnityWebRequest { get; private set; }
+		internal UnityWebRequest UnityWebRequest { get { return unityWebRequest; } }
 
-		private readonly Dictionary<string, string> headers;
+		private readonly UnityWebRequest unityWebRequest;
+		private Dictionary<string, string> headers;
+
+		private event Action<int> onProgress;
+		private event Action<HttpResponse> onSuccess;
+		private event Action<HttpResponse> onError;
+		private event Action<HttpResponse> onNetworkError;
 
 		public HttpRequest(UnityWebRequest unityWebRequest)
 		{
-			UnityWebRequest = unityWebRequest;
-
-			headers = Http.Instance.GetSuperHeaders();
+			this.unityWebRequest = unityWebRequest;
+			headers = new Dictionary<string, string>();
 		}
 
-		public void SetHeader(string key, string value)
+		public HttpRequest IncludeSuperHeaders()
+		{
+			headers = headers.Concat(Http.Instance.GetSuperHeaders()).ToDictionary(x => x.Key, x => x.Value);
+			return this;
+		}
+
+		public HttpRequest SetHeader(string key, string value)
 		{
 			headers[key] = value;
+			return this;
 		}
 
-		public void SetHeaders(IEnumerable<KeyValuePair<string, string>> headers)
+		public HttpRequest SetHeaders(IEnumerable<KeyValuePair<string, string>> headers)
 		{
-			if (headers == null) return;
-
 			foreach (var kvp in headers)
 			{
 				SetHeader(kvp.Key, kvp.Value);
 			}
+
+			return this;
+		}
+
+		public HttpRequest OnProgress(Action<int> onProgress)
+		{
+			this.onProgress += onProgress;
+			return this;
+		}
+
+		public HttpRequest OnSuccess(Action<HttpResponse> onSuccess)
+		{
+			this.onSuccess += onSuccess;
+			return this;
+		}
+
+		public HttpRequest OnError(Action<HttpResponse> onError)
+		{
+			this.onError += onError;
+			return this;
+		}
+
+		public HttpRequest OnNetworkError(Action<HttpResponse> onNetworkError)
+		{
+			this.onNetworkError += onNetworkError;
+			return this;
 		}
 
 		public bool RemoveHeader(string key)
@@ -37,14 +74,23 @@ namespace DUCK.Http
 			return headers.Remove(key);
 		}
 
-		public void Send(Action<HttpResponse> onSuccess = null, Action<HttpResponse> onError = null)
+		public HttpRequest Send()
 		{
 			foreach (var header in headers)
 			{
-				UnityWebRequest.SetRequestHeader(header.Key, header.Value);
+				unityWebRequest.SetRequestHeader(header.Key, header.Value);
 			}
 
 			Http.Instance.Send(this, onSuccess, onError);
+			return this;
+		}
+
+		internal void UpdateProgress(int progress)
+		{
+			if (onProgress != null)
+			{
+				onProgress.Invoke(progress);
+			}
 		}
 	}
 }
