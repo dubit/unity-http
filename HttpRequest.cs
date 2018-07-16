@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine.Networking;
 
 namespace DUCK.Http
@@ -12,20 +11,28 @@ namespace DUCK.Http
 		private readonly UnityWebRequest unityWebRequest;
 		private Dictionary<string, string> headers;
 
-		private event Action<int> onProgress;
+		private event Action<float> onUploadProgress;
+		private event Action<float> onDownloadProgress;
 		private event Action<HttpResponse> onSuccess;
 		private event Action<HttpResponse> onError;
 		private event Action<HttpResponse> onNetworkError;
 
+		private float downloadProgress;
+		private float uploadProgress;
+
 		public HttpRequest(UnityWebRequest unityWebRequest)
 		{
 			this.unityWebRequest = unityWebRequest;
-			headers = new Dictionary<string, string>();
+			headers = new Dictionary<string, string>(Http.GetSuperHeaders());
 		}
 
-		public HttpRequest IncludeSuperHeaders()
+		public HttpRequest RemoveSuperHeaders()
 		{
-			headers = headers.Concat(Http.Instance.GetSuperHeaders()).ToDictionary(x => x.Key, x => x.Value);
+			foreach (var kvp in Http.GetSuperHeaders())
+			{
+				headers.Remove(kvp.Key);
+			}
+
 			return this;
 		}
 
@@ -45,9 +52,15 @@ namespace DUCK.Http
 			return this;
 		}
 
-		public HttpRequest OnProgress(Action<int> onProgress)
+		public HttpRequest OnUploadProgress(Action<float> onProgress)
 		{
-			this.onProgress += onProgress;
+			onUploadProgress += onProgress;
+			return this;
+		}
+
+		public HttpRequest OnDownloadProgress(Action<float> onProgress)
+		{
+			onDownloadProgress += onProgress;
 			return this;
 		}
 
@@ -85,11 +98,26 @@ namespace DUCK.Http
 			return this;
 		}
 
-		internal void UpdateProgress(int progress)
+		public void Abort()
 		{
-			if (onProgress != null)
+			Http.Instance.Abort(this);
+		}
+
+		internal void UpdateProgress()
+		{
+			UpdateProgress(ref downloadProgress, unityWebRequest.downloadProgress, onDownloadProgress);
+			UpdateProgress(ref uploadProgress, unityWebRequest.uploadProgress, onUploadProgress);
+		}
+
+		private void UpdateProgress(ref float currentProgress, float progress, Action<float> onProgress)
+		{
+			if (currentProgress < progress)
 			{
-				onProgress.Invoke(progress);
+				currentProgress = progress;
+				if (onProgress != null)
+				{
+					onProgress.Invoke(downloadProgress);
+				}
 			}
 		}
 	}

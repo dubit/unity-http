@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UnityEngine;
 
 namespace DUCK.Http
 {
@@ -70,7 +69,7 @@ namespace DUCK.Http
 
 		public static string GetResponseTypeMessage(HttpResponse response)
 		{
-			return GetResponseTypeMessage(response.ResponseCode, response.Url);
+			return GetResponseTypeMessage(response.StatusCode, response.Url);
 		}
 
 		public static string GetResponseTypeMessage(long responseCode, string url)

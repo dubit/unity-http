@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -8,38 +9,31 @@ namespace DUCK.Http
 {
 	public sealed class Http : MonoBehaviour
 	{
-		private static Http instance;
-
 		public static Http Instance
 		{
 			get
 			{
-				if (instance == null)
-				{
-					instance = new GameObject("Http").AddComponent<Http>();
-				}
-
+				if (instance != null) return instance;
+				instance = new GameObject(typeof(Http).Name).AddComponent<Http>();
+				instance.gameObject.hideFlags = HideFlags.HideInHierarchy;
+				instance.superHeaders = new Dictionary<string, string>();
+				instance.httpRequests = new Dictionary<HttpRequest, Coroutine>();
 				return instance;
 			}
 		}
 
+		private static Http instance;
+
 		private Dictionary<string, string> superHeaders;
-
-		private void Awake()
-		{
-			instance = this;
-			instance.hideFlags = HideFlags.HideInHierarchy;
-
-			superHeaders = new Dictionary<string, string>();
-		}
+		private Dictionary<HttpRequest, Coroutine> httpRequests;
 
 		/// <summary>
 		/// Super headers are key value pairs that will be added to every subsequent HttpRequest.
 		/// </summary>
 		/// <returns>A dictionary of super-headers.</returns>
-		public Dictionary<string, string> GetSuperHeaders()
+		public static Dictionary<string, string> GetSuperHeaders()
 		{
-			return new Dictionary<string, string>(superHeaders);
+			return new Dictionary<string, string>(Instance.superHeaders);
 		}
 
 		/// <summary>
@@ -47,7 +41,7 @@ namespace DUCK.Http
 		/// </summary>
 		/// <param name="key">The header key to be set.</param>
 		/// <param name="value">The header value to be assigned.</param>
-		public void SetSuperHeader(string key, string value)
+		public static void SetSuperHeader(string key, string value)
 		{
 			if (string.IsNullOrEmpty(key))
 			{
@@ -59,7 +53,7 @@ namespace DUCK.Http
 				throw new ArgumentException("Value cannot be null or empty, if you are intending to remove the value, use the RemoveSuperHeader() method.");
 			}
 
-			superHeaders[key] = value;
+			Instance.superHeaders[key] = value;
 		}
 
 		/// <summary>
@@ -67,17 +61,15 @@ namespace DUCK.Http
 		/// </summary>
 		/// <param name="key">The header key to be removed.</param>
 		/// <returns>If the removal of the element was successful</returns>
-		public bool RemoveSuperHeader(string key)
+		public static bool RemoveSuperHeader(string key)
 		{
 			if (string.IsNullOrEmpty(key))
 			{
 				throw new ArgumentException("Key cannot be null or empty.");
 			}
 
-			return superHeaders.Remove(key);
+			return Instance.superHeaders.Remove(key);
 		}
-
-		#region Creation Helpers
 
 		/// <summary>
 		/// Creates a HttpRequest configured for HTTP GET.
@@ -87,6 +79,38 @@ namespace DUCK.Http
 		public static HttpRequest Get(string uri)
 		{
 			return new HttpRequest(UnityWebRequest.Get(uri));
+		}
+
+		/// <summary>
+		/// Creates a HttpRequest configured for HTTP GET.
+		/// </summary>
+		/// <param name="uri">The URI of the resource to retrieve via HTTP GET.</param>
+		/// <returns>A HttpRequest object configured to retrieve data from uri.</returns>
+		public static HttpRequest GetTexture(string uri)
+		{
+			return new HttpRequest(UnityWebRequestTexture.GetTexture(uri));
+		}
+
+		/// <summary>
+		/// Create a HttpRequest configured to send json data to a server via HTTP POST.
+		/// </summary>
+		/// <param name="uri">The target URI to which json data will be transmitted.</param>
+		/// <param name="json">Json body data.</param>
+		/// <returns>A HttpRequest configured to send json data to uri via POST.</returns>
+		public static HttpRequest PostJson(string uri, string json)
+		{
+			return Post(uri, Encoding.UTF8.GetBytes(json), "application/json");
+		}
+
+		/// <summary>
+		/// Create a HttpRequest configured to send json data to a server via HTTP POST.
+		/// </summary>
+		/// <param name="uri">The target URI to which json data will be transmitted.</param>
+		/// <param name="payload">The object to be parsed to json data.</param>
+		/// <returns>A HttpRequest configured to send json data to uri via POST.</returns>
+		public static HttpRequest PostJson<T>(string uri, T payload) where T : class
+		{
+			return PostJson(uri, JsonUtility.ToJson(payload));
 		}
 
 		/// <summary>
@@ -122,9 +146,35 @@ namespace DUCK.Http
 			return new HttpRequest(UnityWebRequest.Post(uri, formData));
 		}
 
+		/// <summary>
+		/// Create a HttpRequest configured to send form multipart form to a server via HTTP POST.
+		/// </summary>
+		/// <param name="uri">The target URI to which form data will be transmitted.</param>
+		/// <param name="multipartForm">MultipartForm data for formatting and transmission to the remote server.</param>
+		/// <returns>A HttpRequest configured to send form data to uri via POST.</returns>
 		public static HttpRequest Post(string uri, List<IMultipartFormSection> multipartForm)
 		{
 			return new HttpRequest(UnityWebRequest.Post(uri, multipartForm));
+		}
+
+		/// <summary>
+		/// Create a HttpRequest configured to send raw bytes to a server via HTTP POST.
+		/// </summary>
+		/// <param name="uri">The target URI to which bytes will be transmitted.</param>
+		/// <param name="bytes">Byte array data.</param>
+		/// <param name="contentType">String representing the MIME type of the data (e.g. image/jpeg).</param>
+		/// <returns>A HttpRequest configured to send raw bytes to a server via POST.</returns>
+		public static HttpRequest Post(string uri, byte[] bytes, string contentType)
+		{
+			var unityWebRequest = new UnityWebRequest(uri, UnityWebRequest.kHttpVerbPOST)
+			{
+				uploadHandler = new UploadHandlerRaw(bytes)
+				{
+					contentType = contentType
+				},
+				downloadHandler = new DownloadHandlerBuffer()
+			};
+			return new HttpRequest(unityWebRequest);
 		}
 
 		/// <summary>
@@ -170,24 +220,34 @@ namespace DUCK.Http
 			return new HttpRequest(UnityWebRequest.Head(uri));
 		}
 
-		#endregion
-
-		#region None Static Send Methods
-
-		/// <summary>
-		/// Transmit a HTTP request to the remote server at the target URL and process the server’s response.
-		/// </summary>
-		/// <param name="request">The request to transmit</param>
-		/// <param name="onSuccess">The callback for on success response from the server</param>
-		/// <param name="onError">The callback for on error with the request or response.</param>
 		internal void Send(HttpRequest request, Action<HttpResponse> onSuccess = null, Action<HttpResponse> onError = null)
 		{
-			StartCoroutine(SendCoroutine(request, onSuccess, onError));
+			var coroutine = StartCoroutine(SendCoroutine(request, onSuccess, onError));
+			httpRequests.Add(request, coroutine);
 		}
 
-		#endregion
+		internal void Abort(HttpRequest request)
+		{
+			if (request.UnityWebRequest != null && !request.UnityWebRequest.isDone)
+			{
+				request.UnityWebRequest.Abort();
+			}
 
-		#region Send HttpRequest methods
+			if (httpRequests.ContainsKey(request))
+			{
+				StopCoroutine(httpRequests[request]);
+			}
+
+			Instance.httpRequests.Remove(request);
+		}
+
+		private void Update()
+		{
+			foreach (var httpRequest in httpRequests.Keys)
+			{
+				httpRequest.UpdateProgress();
+			}
+		}
 
 		private static IEnumerator SendCoroutine(HttpRequest request, Action<HttpResponse> onSuccess,
 			Action<HttpResponse> onError)
@@ -211,8 +271,8 @@ namespace DUCK.Http
 			{
 				onSuccess.Invoke(response);
 			}
-		}
 
-		#endregion
+			Instance.httpRequests.Remove(request);
+		}
 	}
 }
