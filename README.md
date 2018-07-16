@@ -1,53 +1,93 @@
 # unity-http
 
 ## What is it?
-The http system has a quick and easy API forw making http requests within Unity.  
-THe Http instance will run the WebRequest coroutines for you so you dont have to create it per request.  
-It also includes static helpers for creating the webrequests easily.  
+The http system has a quick and easy API for making http requests within Unity.  
+The Http instance will run the WebRequest coroutines for you so you dont have to create it per request.   
  
+## Features
+* Singleton
+* Fluent API for configuration
+* Success, error and network error events
+* Super headers
+
 ## How to use it.
 
 ```c#
-var request = Http.Get("uri");
-request.Send(successResponse => 
-    {
-        // handle success response
-    },
-    errorResponse => 
-    {
-        // handle error response
-    }
-);
+var request = Http.Get("http://www.dubitlimited.co.uk")
+	.SetHeader("Authorization", "username:password")
+	.OnSuccess(response => Debug.Log(response.Text))
+	.OnError(response => Debug.Log(response.StatusCode))
+	.OnDownloadProgress(progress => Debug.Log(progress))
+	.Send();
 ```
 
-Breaking down a request into steps:
+## API
 
-1. First use one of Http static helper methods to create a HttpRequest. for example we will do a get request.  
-`Http.Get("uri");`  
-This will return a HttpRequest setup for Http Verb GET.  
+### Http Static Methods
 
-2. The next part is to actually send the HttpRequest, we do this by simply calling Send() on the request object.  
-`Http.Get("uri").Send();`  
-The Send method signature has the options for onSuccess and onError callbacks.  
-`HttpRequest.Send(Action<HttpResponse> onSuccess = null, Action<HttpResponse> onError = null);`  
-Both callbacks include the HttpResponse object.  
+All these methods return a new HttpRequest.  
 
-3. You can get the Body of the response in 4 different forms: Text, Bytes, Texture or as an object parsed from Json.  
-Heres what it looks like parsed to an object:  
-`Http.Get("uri").Send(successResponse => { response.ParseBodyAs<User>(); });`  
+##### Get
+* `Http.Get(string uri)`  
+* `Http.GetTexture(string uri)`  
+##### Post
+* `Http.Post(string uri, string postData)`  
+* `Http.Post(string uri, WWWForm formData)`  
+* `Http.Post(string uri, Dictionary<string, string> formData))`  
+* `Http.Post(string uri, List<IMultipartFormSection> multipartForm)`  
+* `Http.Post(string uri, byte[] bytes, string contentType)`  
+##### Post JSON
+* `Http.PostJson(string uri, string json)`  
+* `Http.PostJson<T>(string uri, T payload)` 
+##### Put
+* `Http.Put(string uri, byte[] bodyData)` 
+* `Http.Put(string uri, string bodyData)` 
+##### Misc
+* `Http.Delete(string uri)`  
+* `Http.Head(string uri)`  
 
-### Http Utils
-The HttpUtils.cs holds client side knowedlge of response code messages. These messages are customizable and more can be added.  
-The class also provides a formating and appending method for url parameters.  
+### Http Request Configuration Methods
 
-### Http Helper 
-The `PostAsJson` method provides a HttpRequest configured to send json data to a server via HTTP POST.  
-The `PostAsBytes` method provides a HttpRequest configured to send raw bytes to a server via HTTP POST.  
+All these methods return the HttpRequest instance.  
+##### Headers
+* `SetHeader(string key, string value)`  
+* `SetHeaders(IEnumerable<KeyValuePair<string, string>> headers)`  
+* `RemoveHeader(string key)`  
+* `RemoveSuperHeaders()`  
+##### Events
+* `OnSuccess(Action<HttpResonse> response)`  
+* `OnError(Action<HttpResonse> response)`  
+* `OnNetworkError(Action<HttpResonse> response)`  
+##### Progress
+* `OnUploadProgress(Action<float> progress)`  
+* `OnDownloadProgress(Action<float> progress)`  
 
-### Alternative use
-You can use Http for sending UnityWebRequest with callbacks. For example:  
+### Http Request
 
-`Http.Instance.Send(UnityWebRequest.Post("uri", "payload"), (UnityWebRequest request) => { });`
-`Http.Instance.Send(UnityWebRequest.Post("uri", "payload"), (HttpResponse response) => { });`
-`Http.Instance.Send(UnityWebRequest.Post("uri", "payload"), onError: () => { });`
-`Http.Instance.Send(UnityWebRequest.Post("uri", "payload"), onNetworkError: () => { });`
+* `HttpRequest Send()`  
+* `void Abort()`  
+
+### Http Response
+The callbacks for `OnSuccess`, `OnError` and `OnNetworkError` all return you a `HttpResponse`.  
+This has the following properties:  
+##### Properties
+* `string Url`  
+* `bool IsSuccessful`  
+* `bool IsHttpError`  
+* `bool IsNetworkError`  
+* `long StatusCode`  
+* `ResponseType ResponseType`  
+* `byte[] Bytes`  
+* `string Text`  
+* `Texture Texture`  
+* `Dictionary<string, string> ResponseHeaders`  
+
+### Super Headers
+
+Super Headers are a type of Header that you can set once to automatically attach to every Request you’re sending.  
+They are Headers that apply to all requests without having to manually include them in each HttpRequest SetHeader call.
+
+* `void Http.SetSuperHeader(string key, string value)`  
+* `bool RemoveSuperHeader(string key)`  
+
+* `Dictionary<string, string> GetSuperHeaders()`  
