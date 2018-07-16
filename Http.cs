@@ -70,10 +70,12 @@ namespace DUCK.Http
 			{
 				throw new ArgumentException("Key cannot be null or empty.");
 			}
+
 			if (string.IsNullOrEmpty(value))
 			{
 				throw new ArgumentException("Value cannot be null or empty, if you are intending to remove the value, use the RemoveSuperHeader() method.");
 			}
+
 			superHeaders[key] = value;
 		}
 
@@ -88,6 +90,7 @@ namespace DUCK.Http
 			{
 				throw new ArgumentException("Key cannot be null or empty.");
 			}
+
 			return superHeaders.Remove(key);
 		}
 
@@ -194,9 +197,9 @@ namespace DUCK.Http
 		/// <param name="request">The request to transmit</param>
 		/// <param name="onSuccess">The callback for on success response from the server</param>
 		/// <param name="onError">The callback for on error with the request or response.</param>
-		public void Send(HttpRequest request, Action<HttpResponse> onSuccess = null, Action<HttpResponse> onError = null)
+		public Coroutine Send(HttpRequest request, Action<HttpResponse> onSuccess = null, Action<HttpResponse> onError = null)
 		{
-			StartCoroutine(SendCoroutine(request, onSuccess, onError));
+			return StartCoroutine(SendCoroutine(request, onSuccess, onError));
 		}
 
 		/// <summary>
@@ -206,10 +209,10 @@ namespace DUCK.Http
 		/// <param name="onSuccess">The callback for on success response from the server</param>
 		/// <param name="onError">THe callback for on error with the request or response.</param>
 		/// <param name="onNetworkError">The callback for on network error with the request.</param>
-		public void Send(UnityWebRequest unityWebRequest, Action<UnityWebRequest> onSuccess = null,
+		public Coroutine Send(UnityWebRequest unityWebRequest, Action<UnityWebRequest> onSuccess = null,
 			Action<UnityWebRequest> onError = null, Action<UnityWebRequest> onNetworkError = null)
 		{
-			StartCoroutine(SendCoroutine(unityWebRequest, onSuccess, onError, onNetworkError));
+			return StartCoroutine(SendCoroutine(unityWebRequest, onSuccess, onError, onNetworkError));
 		}
 
 		/// <summary>
@@ -219,10 +222,10 @@ namespace DUCK.Http
 		/// <param name="onSuccess">The callback for on success response from the server</param>
 		/// <param name="onError">The callback for on error with the request or response.</param>
 		/// <param name="onNetworkError">The callback for on network error with the request.</param>
-		public void Send(UnityWebRequest unityWebRequest, Action onSuccess = null,
+		public Coroutine Send(UnityWebRequest unityWebRequest, Action onSuccess = null,
 			Action onError = null, Action onNetworkError = null)
 		{
-			StartCoroutine(SendCoroutine(unityWebRequest, onSuccess, onError, onNetworkError));
+			return StartCoroutine(SendCoroutine(unityWebRequest, onSuccess, onError, onNetworkError));
 		}
 
 		/// <summary>
@@ -231,10 +234,19 @@ namespace DUCK.Http
 		/// <param name="unityWebRequest">The request to transmit</param>
 		/// <param name="onSuccess">The callback for on success response from the server</param>
 		/// <param name="onError">The callback for on error with the request or response.</param>
-		public void Send(UnityWebRequest unityWebRequest, Action<HttpResponse> onSuccess = null,
+		public Coroutine Send(UnityWebRequest unityWebRequest, Action<HttpResponse> onSuccess = null,
 			Action<HttpResponse> onError = null)
 		{
-			StartCoroutine(SendCoroutine(unityWebRequest, onSuccess, onError));
+			return StartCoroutine(SendCoroutine(unityWebRequest, onSuccess, onError));
+		}
+
+		#endregion
+
+		#region Abort HttpRequest method
+
+		public void Abort(Coroutine coroutine)
+		{
+			StopCoroutine(coroutine);
 		}
 
 		#endregion
