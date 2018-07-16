@@ -32,7 +32,7 @@ namespace DUCK.Http
 			var downloadHandlerTexture = unityWebRequest.downloadHandler as DownloadHandlerTexture;
 			if (downloadHandlerTexture != null)
 			{
-				Texture = DownloadHandlerTexture.GetContent(unityWebRequest);
+				Texture = downloadHandlerTexture.texture;
 			}
 		}
 	}
