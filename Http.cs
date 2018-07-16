@@ -68,7 +68,7 @@ namespace DUCK.Http
 			{
 				throw new ArgumentException("Key cannot be null or empty.");
 			}
-
+ 
 			return Instance.superHeaders.Remove(key);
 		}
 
