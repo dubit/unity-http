@@ -11,7 +11,7 @@ The Http instance will run the WebRequest coroutines for you so you dont have to
 * Super headers
 
 ## Requirements
-Unity 2017.3 and above (Required for GetTexture, SendRequest() and Assembly Definitions).
+Unity 2017.3 and above (Required for GetTexture, SendWebRequest() and Assembly Definitions).
 
 ## How to use it.
 
