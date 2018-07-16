@@ -65,6 +65,10 @@ All these methods return the HttpRequest instance.
 * `OnUploadProgress(Action<float> progress)`  
 * `OnDownloadProgress(Action<float> progress)`  
 
+Progress events will invoke each time the progress value has increased, they are subjet to Unity's documentation.
+* [Upload Progress Documentation](https://docs.unity3d.com/ScriptReference/Networking.UnityWebRequest-uploadProgress.html)
+* [Download Progress Documentation](https://docs.unity3d.com/ScriptReference/Networking.UnityWebRequest-downloadProgress.html)
+ 
 ### Http Request
 
 * `HttpRequest Send()`  
