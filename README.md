@@ -94,7 +94,6 @@ This has the following properties:
 Super Headers are a type of Header that you can set once to automatically attach to every Request you’re sending.  
 They are Headers that apply to all requests without having to manually include them in each HttpRequest SetHeader call.
 
-* `void Http.SetSuperHeader(string key, string value)`  
-* `bool RemoveSuperHeader(string key)`  
-
-* `Dictionary<string, string> GetSuperHeaders()`  
+* `Http.SetSuperHeader(string key, string value)`
+* `Http.RemoveSuperHeader(string key)` returns `bool`
+* `Http.GetSuperHeaders()` returns `Dictionary<string, string>`
