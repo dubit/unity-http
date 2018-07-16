@@ -1,7 +1,7 @@
 # unity-http
 
 ## What is it?
-The http system has a quick and easy API for making http requests within Unity.  
+The Http system has a quick and easy API for making http requests within Unity.  
 The Http instance will run the WebRequest coroutines for you so you dont have to create it per request.   
  
 ## Features
@@ -65,7 +65,7 @@ All these methods return the HttpRequest instance.
 * `OnUploadProgress(Action<float> progress)`  
 * `OnDownloadProgress(Action<float> progress)`  
 
-Progress events will invoke each time the progress value has increased, they are subjet to Unity's documentation.
+Progress events will invoke each time the progress value has increased, they are subject to Unity's documentation.
 * [Upload Progress Documentation](https://docs.unity3d.com/ScriptReference/Networking.UnityWebRequest-uploadProgress.html)
 * [Download Progress Documentation](https://docs.unity3d.com/ScriptReference/Networking.UnityWebRequest-downloadProgress.html)
  
