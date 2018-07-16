@@ -6,6 +6,18 @@ namespace DUCK.Http
 {
 	public static class HttpHelpers
 	{
+#if UNITY_2017_3_OR_NEWER
+		/// <summary>
+		/// Creates a Texture HttpRequest configured for HTTP GET.
+		/// </summary>
+		/// <param name="uri">The URI of the texture to retrieve via HTTP GET.</param>
+		/// <returns>A HttpRequest object configured to retrieve data from uri.</returns>
+		public static HttpRequest GetTexture(string uri)
+		{
+			return new HttpRequest(UnityWebRequestTexture.GetTexture(uri));
+		}
+#endif
+
 		/// <summary>
 		/// Create a HttpRequest configured to send json data to a server via HTTP POST.
 		/// </summary>
