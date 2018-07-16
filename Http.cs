@@ -18,6 +18,7 @@ namespace DUCK.Http
 				instance.gameObject.hideFlags = HideFlags.HideInHierarchy;
 				instance.superHeaders = new Dictionary<string, string>();
 				instance.httpRequests = new Dictionary<HttpRequest, Coroutine>();
+				DontDestroyOnLoad(instance.gameObject);
 				return instance;
 			}
 		}
