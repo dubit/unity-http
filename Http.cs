@@ -254,11 +254,8 @@ namespace DUCK.Http
 			Action<HttpResponse> onError)
 		{
 			var unityWebRequest = request.UnityWebRequest;
-#if UNITY_2017_2_OR_NEWER
 			yield return unityWebRequest.SendWebRequest();
-#else
-			yield return unityWebRequest.Send();
-#endif
+
 			var response = new HttpResponse(unityWebRequest);
 
 			if (unityWebRequest.isNetworkError || unityWebRequest.isHttpError)

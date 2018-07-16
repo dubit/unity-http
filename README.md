@@ -10,6 +10,9 @@ The Http instance will run the WebRequest coroutines for you so you dont have to
 * Success, error and network error events
 * Super headers
 
+## Requirements
+Unity 2017.3 and above (Required for GetTexture, SendRequest() and Assembly Definitions).
+
 ## How to use it.
 
 ```c#
