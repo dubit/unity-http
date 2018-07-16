@@ -93,7 +93,7 @@ namespace DUCK.Http
 		}
 
 		/// <summary>
-		/// Create a HttpRequest configured to send form data to a server via HTTP POST.
+		/// Creates a HttpRequest configured to send form data to a server via HTTP POST.
 		/// </summary>
 		/// <param name="uri">The target URI to which form data will be transmitted.</param>
 		/// <param name="postData">Form body data. Will be URLEncoded via WWWTranscoder.URLEncode prior to transmission.</param>
@@ -104,7 +104,7 @@ namespace DUCK.Http
 		}
 
 		/// <summary>
-		/// Create a HttpRequest configured to send form data to a server via HTTP POST.
+		/// Creates a HttpRequest configured to send form data to a server via HTTP POST.
 		/// </summary>
 		/// <param name="uri">The target URI to which form data will be transmitted.</param>
 		/// <param name="formData">Form fields or files encapsulated in a WWWForm object, for formatting and transmission to the remote server.</param>
@@ -115,7 +115,7 @@ namespace DUCK.Http
 		}
 
 		/// <summary>
-		/// Create a HttpRequest configured to send form data to a server via HTTP POST.
+		/// Creates a HttpRequest configured to send form data to a server via HTTP POST.
 		/// </summary>
 		/// <param name="uri">The target URI to which form data will be transmitted.</param>
 		/// <param name="formData">Form fields in the form of a Key Value Pair, for formatting and transmission to the remote server.</param>
@@ -126,7 +126,7 @@ namespace DUCK.Http
 		}
 
 		/// <summary>
-		/// Create a HttpRequest configured to send form multipart form to a server via HTTP POST.
+		/// Creates a HttpRequest configured to send form multipart form to a server via HTTP POST.
 		/// </summary>
 		/// <param name="uri">The target URI to which form data will be transmitted.</param>
 		/// <param name="multipartForm">MultipartForm data for formatting and transmission to the remote server.</param>
@@ -137,7 +137,7 @@ namespace DUCK.Http
 		}
 
 		/// <summary>
-		/// Create a HttpRequest configured to send raw bytes to a server via HTTP POST.
+		/// Creates a HttpRequest configured to send raw bytes to a server via HTTP POST.
 		/// </summary>
 		/// <param name="uri">The target URI to which bytes will be transmitted.</param>
 		/// <param name="bytes">Byte array data.</param>
@@ -157,7 +157,7 @@ namespace DUCK.Http
 		}
 
 		/// <summary>
-		/// Create a HttpRequest configured to send json data to a server via HTTP POST.
+		/// Creates a HttpRequest configured to send json data to a server via HTTP POST.
 		/// </summary>
 		/// <param name="uri">The target URI to which json data will be transmitted.</param>
 		/// <param name="json">Json body data.</param>
@@ -168,7 +168,7 @@ namespace DUCK.Http
 		}
 
 		/// <summary>
-		/// Create a HttpRequest configured to send json data to a server via HTTP POST.
+		/// Creates a HttpRequest configured to send json data to a server via HTTP POST.
 		/// </summary>
 		/// <param name="uri">The target URI to which json data will be transmitted.</param>
 		/// <param name="payload">The object to be parsed to json data.</param>
@@ -179,7 +179,7 @@ namespace DUCK.Http
 		}
 
 		/// <summary>
-		/// Create a HttpRequest configured to upload raw data to a remote server via HTTP PUT.
+		/// Creates a HttpRequest configured to upload raw data to a remote server via HTTP PUT.
 		/// </summary>
 		/// <param name="uri">The URI to which the data will be sent.</param>
 		/// <param name="bodyData">The data to transmit to the remote server.</param>
@@ -190,7 +190,7 @@ namespace DUCK.Http
 		}
 
 		/// <summary>
-		/// Create a HttpRequest configured to upload raw data to a remote server via HTTP PUT.
+		/// Creates a HttpRequest configured to upload raw data to a remote server via HTTP PUT.
 		/// </summary>
 		/// <param name="uri">The URI to which the data will be sent.</param>
 		/// <param name="bodyData">The data to transmit to the remote server.
