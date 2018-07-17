@@ -221,9 +221,10 @@ namespace DUCK.Http
 			return new HttpRequest(UnityWebRequest.Head(uri));
 		}
 
-		internal void Send(HttpRequest request, Action<HttpResponse> onSuccess = null, Action<HttpResponse> onError = null)
+		internal void Send(HttpRequest request, Action<HttpResponse> onSuccess = null,
+			Action<HttpResponse> onError = null, Action<HttpResponse> onNetworkError = null)
 		{
-			var coroutine = StartCoroutine(SendCoroutine(request, onSuccess, onError));
+			var coroutine = StartCoroutine(SendCoroutine(request, onSuccess, onError, onNetworkError));
 			httpRequests.Add(request, coroutine);
 		}
 
@@ -250,15 +251,22 @@ namespace DUCK.Http
 			}
 		}
 
-		private static IEnumerator SendCoroutine(HttpRequest request, Action<HttpResponse> onSuccess,
-			Action<HttpResponse> onError)
+		private static IEnumerator SendCoroutine(HttpRequest request, Action<HttpResponse> onSuccess = null,
+			Action<HttpResponse> onError = null, Action<HttpResponse> onNetworkError = null)
 		{
 			var unityWebRequest = request.UnityWebRequest;
 			yield return unityWebRequest.SendWebRequest();
 
 			var response = new HttpResponse(unityWebRequest);
 
-			if (unityWebRequest.isNetworkError || unityWebRequest.isHttpError)
+			if (unityWebRequest.isNetworkError)
+			{
+				if (onNetworkError != null)
+				{
+					onNetworkError.Invoke(response);
+				}
+			}
+			else if (unityWebRequest.isHttpError)
 			{
 				if (onError != null)
 				{
