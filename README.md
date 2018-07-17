@@ -112,7 +112,7 @@ In this given example, the `response.Text` from `http://mywebapi.com/user.json` 
 ```json
 {
     "id": 92,
-    "username": "jason",
+    "username": "jason"
 }
 ```
 
