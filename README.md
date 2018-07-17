@@ -3,7 +3,7 @@
 ## What is it?
 The Http system has a quick and easy API for making http requests within Unity.  
 The Http instance will run the WebRequest coroutines for you so you dont have to create it per request.   
- 
+
 ## Features
 * Singleton
 * Fluent API for configuration
@@ -13,10 +13,18 @@ The Http instance will run the WebRequest coroutines for you so you dont have to
 ## Requirements
 Unity 2017.3 and above (Required for GetTexture, SendWebRequest() and Assembly Definitions).
 
+## Installation
+It's recommended that you submodule this repo to your Assets directory using:  
+`git submodule add git@github.com:dubit/unity-http.git Assets/DUCK/Http`  
+
+This package is also part of <b>D</b>ubit <b>U</b>nity <b>C</b>omponent <b>K</b>it (<b>DUCK</b>) and can be installed via the [DUCK Package Manager](https://github.com/dubit/duck-package-manager). 
+
 ## How to use it.
+If you are using an AssemblyDefinition then reference the Http Assembly.  
+Import the namespace `using DUCK.Http;`
 
 ```c#
-var request = Http.Get("http://www.dubitlimited.co.uk")
+var request = Http.Get("http://mywebapi.com/")
 	.SetHeader("Authorization", "username:password")
 	.OnSuccess(response => Debug.Log(response.Text))
 	.OnError(response => Debug.Log(response.StatusCode))
@@ -97,3 +105,42 @@ They are Headers that apply to all requests without having to manually include t
 * `Http.SetSuperHeader(string key, string value)`
 * `Http.RemoveSuperHeader(string key)` returns `bool`
 * `Http.GetSuperHeaders()` returns `Dictionary<string, string>`
+
+
+## JSON Response Example
+In this given example, the `response.Text` from `http://mywebapi.com/user.json` is:
+```json
+{
+    "id": 92,
+    "username": "jason"
+}
+```
+
+Create a serializable class that maps the data from the json response to fields
+```c#
+[Serializable]
+public class User
+{
+    [SerializeField]
+    public int id;
+    [SerializeField]
+    public string username;
+}
+```
+
+We can listen for the event `OnSuccess` with our handler method `HandleSuccess`
+```c#
+var request = Http.Get("http://mywebapi.com/user.json")
+    .OnSuccess(HandleSuccess)
+    .OnError(response => Debug.Log(response.StatusCode))
+    .Send();
+```
+
+Parse the `response.Text` to the serialized class `User` that we declared earlier by using Unity's built in [JSONUtility](https://docs.unity3d.com/ScriptReference/JsonUtility.html)
+```c#
+private void HandleSuccess(HttpResponse response)
+{
+     var user = JsonUtility.FromJson<User>(response.Text);
+     Debug.Log(user.username);
+}
+```
