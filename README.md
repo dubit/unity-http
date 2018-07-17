@@ -111,8 +111,8 @@ They are Headers that apply to all requests without having to manually include t
 In this given example, the `response.Text` from `http://mywebapi.com/user.json` is:
 ```json
 {
-    "id": "92",
-    "username": "jason"
+    "id": 92,
+    "username": "jason",
 }
 ```
 
@@ -122,7 +122,7 @@ Create a serializable class that maps the data from the json response to fields
 public class User
 {
     [SerializeField]
-    public string id;
+    public int id;
     [SerializeField]
     public string username;
 }
