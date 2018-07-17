@@ -3,7 +3,7 @@
 ## What is it?
 The Http system has a quick and easy API for making http requests within Unity.  
 The Http instance will run the WebRequest coroutines for you so you dont have to create it per request.   
- 
+
 ## Features
 * Singleton
 * Fluent API for configuration
@@ -13,7 +13,16 @@ The Http instance will run the WebRequest coroutines for you so you dont have to
 ## Requirements
 Unity 2017.3 and above (Required for GetTexture, SendWebRequest() and Assembly Definitions).
 
-## How to use it.
+## How do i get it?
+It's recommended that you submodule this repo to your Assets directory using:  
+`git submodule add git@github.com:dubit/unity-http.git Assets/DUCK/Http`  
+
+This package is also part of <b>D</b>ubit <b>U</b>nity <b>C</b>omponent <b>K</b>it (<b>DUCK</b>) and is available in the [DUCK Package Manager](https://github.com/dubit/duck-package-manager). 
+
+
+## How do i use it?
+If you are using an AssemblyDefinition then reference the Http Assembly.  
+Import the namespace `using DUCK.Http;`
 
 ```c#
 var request = Http.Get("http://www.dubitlimited.co.uk")
