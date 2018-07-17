@@ -13,19 +13,19 @@ The Http instance will run the WebRequest coroutines for you so you dont have to
 ## Requirements
 Unity 2017.3 and above (Required for GetTexture, SendWebRequest() and Assembly Definitions).
 
-## How do i get it?
+## Installation
 It's recommended that you submodule this repo to your Assets directory using:  
 `git submodule add git@github.com:dubit/unity-http.git Assets/DUCK/Http`  
 
-This package is also part of <b>D</b>ubit <b>U</b>nity <b>C</b>omponent <b>K</b>it (<b>DUCK</b>) and is available in the [DUCK Package Manager](https://github.com/dubit/duck-package-manager). 
+This package is also part of <b>D</b>ubit <b>U</b>nity <b>C</b>omponent <b>K</b>it (<b>DUCK</b>) and can be installed via the [DUCK Package Manager](https://github.com/dubit/duck-package-manager). 
 
 
-## How do i use it?
+## How to use it.
 If you are using an AssemblyDefinition then reference the Http Assembly.  
 Import the namespace `using DUCK.Http;`
 
 ```c#
-var request = Http.Get("http://www.dubitlimited.co.uk")
+var request = Http.Get("http://mywebapi.com/")
 	.SetHeader("Authorization", "username:password")
 	.OnSuccess(response => Debug.Log(response.Text))
 	.OnError(response => Debug.Log(response.StatusCode))
@@ -109,7 +109,7 @@ They are Headers that apply to all requests without having to manually include t
 
 
 ## JSON response Example
-In this given example, the `response.Text` from `http://www.mywebapi.com/user.json` is:
+In this given example, the `response.Text` from `http://mywebapi.com/user.json` is:
 ```json
 {
     "id": "92",
@@ -131,8 +131,9 @@ public class User
 
 We can listen for the event `OnSuccess` with our handler method `HandleSuccess`
 ```c#
-var request = Http.Get("http://www.mywebapi.com/user.json")
+var request = Http.Get("http://mywebapi.com/user.json")
     .OnSuccess(HandleSuccess)
+    .OnError(response => Debug.Log(response.StatusCode))
     .Send();
 ```
 
