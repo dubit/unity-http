@@ -94,7 +94,7 @@ namespace DUCK.Http
 				unityWebRequest.SetRequestHeader(header.Key, header.Value);
 			}
 
-			Http.Instance.Send(this, onSuccess, onError);
+			Http.Instance.Send(this, onSuccess, onError, onNetworkError);
 			return this;
 		}
 
