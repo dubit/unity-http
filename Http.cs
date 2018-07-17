@@ -1,62 +1,40 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 
 namespace DUCK.Http
 {
-	// How to use
-	// First use one of Http static helper methods to create a HttpRequest. for example we will do a get request.
-	// Http.Get("uri");
-	// This will return a HttpRequest setup for Http Verb GET.
-	// The next part is to actually send the HttpRequest, we do this by simply calling Send() on the HttpRequest.
-	// Http.Get("uri").Send();
-	// The Send method signature has the options for onSuccess and onError callbacks.
-	// HttpRequest.Send(Action<HttpResponse> onSuccess = null, Action<HttpResponse> onError = null);
-	// Both callbacks include the HttpResponse object.
-	// You can get the Body of the response in 4 different forms: Text, Bytes, Texture or as an object parsed from Json.
-	// Heres what it looks like parsed to an object:
-	// Http.Get("uri").Send(response => { response.ParseBodyAs<User>(); });
-	//
-	// Alternatively you can use Http for sending UnityWebRequest with callbacks. For example:
-	// Http.Instance.Send(UnityWebRequest.Post("uri", "payload"), (UnityWebRequest request) => { });
-	// Http.Instance.Send(UnityWebRequest.Post("uri", "payload"), onError: () => { });
-	// Http.Instance.Send(UnityWebRequest.Post("uri", "payload"), onNetworkError: () => { });
 	public sealed class Http : MonoBehaviour
 	{
-		private static Http instance;
-
 		public static Http Instance
 		{
 			get
 			{
-				if (instance == null)
-				{
-					instance = new GameObject("Http").AddComponent<Http>();
-				}
-
+				if (instance != null) return instance;
+				instance = new GameObject(typeof(Http).Name).AddComponent<Http>();
+				instance.gameObject.hideFlags = HideFlags.HideInHierarchy;
+				instance.superHeaders = new Dictionary<string, string>();
+				instance.httpRequests = new Dictionary<HttpRequest, Coroutine>();
+				DontDestroyOnLoad(instance.gameObject);
 				return instance;
 			}
 		}
 
+		private static Http instance;
+
 		private Dictionary<string, string> superHeaders;
-
-		private void Awake()
-		{
-			instance = this;
-			instance.hideFlags = HideFlags.HideInHierarchy;
-
-			superHeaders = new Dictionary<string, string>();
-		}
+		private Dictionary<HttpRequest, Coroutine> httpRequests;
 
 		/// <summary>
 		/// Super headers are key value pairs that will be added to every subsequent HttpRequest.
 		/// </summary>
 		/// <returns>A dictionary of super-headers.</returns>
-		public Dictionary<string, string> GetSuperHeaders()
+		public static Dictionary<string, string> GetSuperHeaders()
 		{
-			return new Dictionary<string, string>(superHeaders);
+			return new Dictionary<string, string>(Instance.superHeaders);
 		}
 
 		/// <summary>
@@ -64,7 +42,7 @@ namespace DUCK.Http
 		/// </summary>
 		/// <param name="key">The header key to be set.</param>
 		/// <param name="value">The header value to be assigned.</param>
-		public void SetSuperHeader(string key, string value)
+		public static void SetSuperHeader(string key, string value)
 		{
 			if (string.IsNullOrEmpty(key))
 			{
@@ -76,7 +54,7 @@ namespace DUCK.Http
 				throw new ArgumentException("Value cannot be null or empty, if you are intending to remove the value, use the RemoveSuperHeader() method.");
 			}
 
-			superHeaders[key] = value;
+			Instance.superHeaders[key] = value;
 		}
 
 		/// <summary>
@@ -84,17 +62,15 @@ namespace DUCK.Http
 		/// </summary>
 		/// <param name="key">The header key to be removed.</param>
 		/// <returns>If the removal of the element was successful</returns>
-		public bool RemoveSuperHeader(string key)
+		public static bool RemoveSuperHeader(string key)
 		{
 			if (string.IsNullOrEmpty(key))
 			{
 				throw new ArgumentException("Key cannot be null or empty.");
 			}
 
-			return superHeaders.Remove(key);
+			return Instance.superHeaders.Remove(key);
 		}
-
-		#region Creation Helpers
 
 		/// <summary>
 		/// Creates a HttpRequest configured for HTTP GET.
@@ -107,7 +83,17 @@ namespace DUCK.Http
 		}
 
 		/// <summary>
-		/// Create a HttpRequest configured to send form data to a server via HTTP POST.
+		/// Creates a HttpRequest configured for HTTP GET.
+		/// </summary>
+		/// <param name="uri">The URI of the resource to retrieve via HTTP GET.</param>
+		/// <returns>A HttpRequest object configured to retrieve data from uri.</returns>
+		public static HttpRequest GetTexture(string uri)
+		{
+			return new HttpRequest(UnityWebRequestTexture.GetTexture(uri));
+		}
+
+		/// <summary>
+		/// Creates a HttpRequest configured to send form data to a server via HTTP POST.
 		/// </summary>
 		/// <param name="uri">The target URI to which form data will be transmitted.</param>
 		/// <param name="postData">Form body data. Will be URLEncoded via WWWTranscoder.URLEncode prior to transmission.</param>
@@ -118,7 +104,7 @@ namespace DUCK.Http
 		}
 
 		/// <summary>
-		/// Create a HttpRequest configured to send form data to a server via HTTP POST.
+		/// Creates a HttpRequest configured to send form data to a server via HTTP POST.
 		/// </summary>
 		/// <param name="uri">The target URI to which form data will be transmitted.</param>
 		/// <param name="formData">Form fields or files encapsulated in a WWWForm object, for formatting and transmission to the remote server.</param>
@@ -129,7 +115,7 @@ namespace DUCK.Http
 		}
 
 		/// <summary>
-		/// Create a HttpRequest configured to send form data to a server via HTTP POST.
+		/// Creates a HttpRequest configured to send form data to a server via HTTP POST.
 		/// </summary>
 		/// <param name="uri">The target URI to which form data will be transmitted.</param>
 		/// <param name="formData">Form fields in the form of a Key Value Pair, for formatting and transmission to the remote server.</param>
@@ -139,13 +125,61 @@ namespace DUCK.Http
 			return new HttpRequest(UnityWebRequest.Post(uri, formData));
 		}
 
+		/// <summary>
+		/// Creates a HttpRequest configured to send form multipart form to a server via HTTP POST.
+		/// </summary>
+		/// <param name="uri">The target URI to which form data will be transmitted.</param>
+		/// <param name="multipartForm">MultipartForm data for formatting and transmission to the remote server.</param>
+		/// <returns>A HttpRequest configured to send form data to uri via POST.</returns>
 		public static HttpRequest Post(string uri, List<IMultipartFormSection> multipartForm)
 		{
 			return new HttpRequest(UnityWebRequest.Post(uri, multipartForm));
 		}
 
 		/// <summary>
-		/// Create a HttpRequest configured to upload raw data to a remote server via HTTP PUT.
+		/// Creates a HttpRequest configured to send raw bytes to a server via HTTP POST.
+		/// </summary>
+		/// <param name="uri">The target URI to which bytes will be transmitted.</param>
+		/// <param name="bytes">Byte array data.</param>
+		/// <param name="contentType">String representing the MIME type of the data (e.g. image/jpeg).</param>
+		/// <returns>A HttpRequest configured to send raw bytes to a server via POST.</returns>
+		public static HttpRequest Post(string uri, byte[] bytes, string contentType)
+		{
+			var unityWebRequest = new UnityWebRequest(uri, UnityWebRequest.kHttpVerbPOST)
+			{
+				uploadHandler = new UploadHandlerRaw(bytes)
+				{
+					contentType = contentType
+				},
+				downloadHandler = new DownloadHandlerBuffer()
+			};
+			return new HttpRequest(unityWebRequest);
+		}
+
+		/// <summary>
+		/// Creates a HttpRequest configured to send json data to a server via HTTP POST.
+		/// </summary>
+		/// <param name="uri">The target URI to which json data will be transmitted.</param>
+		/// <param name="json">Json body data.</param>
+		/// <returns>A HttpRequest configured to send json data to uri via POST.</returns>
+		public static HttpRequest PostJson(string uri, string json)
+		{
+			return Post(uri, Encoding.UTF8.GetBytes(json), "application/json");
+		}
+
+		/// <summary>
+		/// Creates a HttpRequest configured to send json data to a server via HTTP POST.
+		/// </summary>
+		/// <param name="uri">The target URI to which json data will be transmitted.</param>
+		/// <param name="payload">The object to be parsed to json data.</param>
+		/// <returns>A HttpRequest configured to send json data to uri via POST.</returns>
+		public static HttpRequest PostJson<T>(string uri, T payload) where T : class
+		{
+			return PostJson(uri, JsonUtility.ToJson(payload));
+		}
+
+		/// <summary>
+		/// Creates a HttpRequest configured to upload raw data to a remote server via HTTP PUT.
 		/// </summary>
 		/// <param name="uri">The URI to which the data will be sent.</param>
 		/// <param name="bodyData">The data to transmit to the remote server.</param>
@@ -156,7 +190,7 @@ namespace DUCK.Http
 		}
 
 		/// <summary>
-		/// Create a HttpRequest configured to upload raw data to a remote server via HTTP PUT.
+		/// Creates a HttpRequest configured to upload raw data to a remote server via HTTP PUT.
 		/// </summary>
 		/// <param name="uri">The URI to which the data will be sent.</param>
 		/// <param name="bodyData">The data to transmit to the remote server.
@@ -187,81 +221,41 @@ namespace DUCK.Http
 			return new HttpRequest(UnityWebRequest.Head(uri));
 		}
 
-		#endregion
-
-		#region None Static Send Methods
-
-		/// <summary>
-		/// Transmit a HTTP request to the remote server at the target URL and process the server’s response.
-		/// </summary>
-		/// <param name="request">The request to transmit</param>
-		/// <param name="onSuccess">The callback for on success response from the server</param>
-		/// <param name="onError">The callback for on error with the request or response.</param>
-		public Coroutine Send(HttpRequest request, Action<HttpResponse> onSuccess = null, Action<HttpResponse> onError = null)
+		internal void Send(HttpRequest request, Action<HttpResponse> onSuccess = null, Action<HttpResponse> onError = null)
 		{
-			return StartCoroutine(SendCoroutine(request, onSuccess, onError));
+			var coroutine = StartCoroutine(SendCoroutine(request, onSuccess, onError));
+			httpRequests.Add(request, coroutine);
 		}
 
-		/// <summary>
-		/// Transmit a HTTP request to the remote server at the target URL and process the server’s response.
-		/// </summary>
-		/// <param name="unityWebRequest">The request to transmit</param>
-		/// <param name="onSuccess">The callback for on success response from the server</param>
-		/// <param name="onError">THe callback for on error with the request or response.</param>
-		/// <param name="onNetworkError">The callback for on network error with the request.</param>
-		public Coroutine Send(UnityWebRequest unityWebRequest, Action<UnityWebRequest> onSuccess = null,
-			Action<UnityWebRequest> onError = null, Action<UnityWebRequest> onNetworkError = null)
+		internal void Abort(HttpRequest request)
 		{
-			return StartCoroutine(SendCoroutine(unityWebRequest, onSuccess, onError, onNetworkError));
+			if (request.UnityWebRequest != null && !request.UnityWebRequest.isDone)
+			{
+				request.UnityWebRequest.Abort();
+			}
+
+			if (httpRequests.ContainsKey(request))
+			{
+				StopCoroutine(httpRequests[request]);
+			}
+
+			Instance.httpRequests.Remove(request);
 		}
 
-		/// <summary>
-		/// Transmit a HTTP request to the remote server at the target URL and process the server’s response.
-		/// </summary>
-		/// <param name="unityWebRequest">The request to transmit</param>
-		/// <param name="onSuccess">The callback for on success response from the server</param>
-		/// <param name="onError">The callback for on error with the request or response.</param>
-		/// <param name="onNetworkError">The callback for on network error with the request.</param>
-		public Coroutine Send(UnityWebRequest unityWebRequest, Action onSuccess = null,
-			Action onError = null, Action onNetworkError = null)
+		private void Update()
 		{
-			return StartCoroutine(SendCoroutine(unityWebRequest, onSuccess, onError, onNetworkError));
+			foreach (var httpRequest in httpRequests.Keys)
+			{
+				httpRequest.UpdateProgress();
+			}
 		}
-
-		/// <summary>
-		/// Transmit a HTTP request to the remote server at the target URL and process the server’s response.
-		/// </summary>
-		/// <param name="unityWebRequest">The request to transmit</param>
-		/// <param name="onSuccess">The callback for on success response from the server</param>
-		/// <param name="onError">The callback for on error with the request or response.</param>
-		public Coroutine Send(UnityWebRequest unityWebRequest, Action<HttpResponse> onSuccess = null,
-			Action<HttpResponse> onError = null)
-		{
-			return StartCoroutine(SendCoroutine(unityWebRequest, onSuccess, onError));
-		}
-
-		#endregion
-
-		#region Abort HttpRequest method
-
-		public void Abort(Coroutine coroutine)
-		{
-			StopCoroutine(coroutine);
-		}
-
-		#endregion
-
-		#region Send HttpRequest methods
 
 		private static IEnumerator SendCoroutine(HttpRequest request, Action<HttpResponse> onSuccess,
 			Action<HttpResponse> onError)
 		{
 			var unityWebRequest = request.UnityWebRequest;
-#if UNITY_2017_2_OR_NEWER
 			yield return unityWebRequest.SendWebRequest();
-#else
-			yield return unityWebRequest.Send();
-#endif
+
 			var response = new HttpResponse(unityWebRequest);
 
 			if (unityWebRequest.isNetworkError || unityWebRequest.isHttpError)
@@ -275,99 +269,8 @@ namespace DUCK.Http
 			{
 				onSuccess.Invoke(response);
 			}
+
+			Instance.httpRequests.Remove(request);
 		}
-
-		#endregion
-
-		#region Send UnityWebRequest methods
-
-		private static IEnumerator SendCoroutine(UnityWebRequest unityWebRequest,
-			Action onSuccess = null, Action onError = null, Action onNetworkError = null)
-		{
-#if UNITY_2017_2_OR_NEWER
-			yield return unityWebRequest.SendWebRequest();
-#else
-			yield return unityWebRequest.Send();
-#endif
-			if (unityWebRequest.isNetworkError)
-			{
-				if (onNetworkError != null)
-				{
-					onNetworkError.Invoke();
-				}
-			}
-			else if (unityWebRequest.isHttpError)
-			{
-				if (onError != null)
-				{
-					onError.Invoke();
-				}
-			}
-			else
-			{
-				if (onSuccess != null)
-				{
-					onSuccess.Invoke();
-				}
-			}
-		}
-
-		private static IEnumerator SendCoroutine(UnityWebRequest unityWebRequest,
-			Action<UnityWebRequest> onSuccess = null,
-			Action<UnityWebRequest> onError = null, Action<UnityWebRequest> onNetworkError = null)
-		{
-#if UNITY_2017_2_OR_NEWER
-			yield return unityWebRequest.SendWebRequest();
-#else
-			yield return unityWebRequest.Send();
-#endif
-			if (unityWebRequest.isNetworkError)
-			{
-				if (onNetworkError != null)
-				{
-					onNetworkError.Invoke(unityWebRequest);
-				}
-			}
-			else if (unityWebRequest.isHttpError)
-			{
-				if (onError != null)
-				{
-					onError.Invoke(unityWebRequest);
-				}
-			}
-			else
-			{
-				if (onSuccess != null)
-				{
-					onSuccess.Invoke(unityWebRequest);
-				}
-			}
-		}
-
-		private static IEnumerator SendCoroutine(UnityWebRequest request,
-			Action<HttpResponse> onSuccess,
-			Action<HttpResponse> onError)
-		{
-#if UNITY_2017_2_OR_NEWER
-			yield return request.SendWebRequest();
-#else
-			yield return request.Send();
-#endif
-			var response = new HttpResponse(request);
-
-			if (request.isNetworkError || request.isHttpError)
-			{
-				if (onError != null)
-				{
-					onError.Invoke(response);
-				}
-			}
-			else if (onSuccess != null)
-			{
-				onSuccess.Invoke(response);
-			}
-		}
-
-		#endregion
 	}
 }
