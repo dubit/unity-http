@@ -106,3 +106,41 @@ They are Headers that apply to all requests without having to manually include t
 * `Http.SetSuperHeader(string key, string value)`
 * `Http.RemoveSuperHeader(string key)` returns `bool`
 * `Http.GetSuperHeaders()` returns `Dictionary<string, string>`
+
+
+## JSON response Example
+In this given example, the `response.Text` from `http://www.mywebapi.com/user.json` is:
+```json
+{
+    "id": "92",
+    "username": "jason"
+}
+```
+
+Create a serializable class that maps the data from the json response to fields
+```c#
+[Serializable]
+public class User
+{
+    [SerializeField]
+    public string id;
+    [SerializeField]
+    public string username;
+}
+```
+
+We can listen for the event `OnSuccess` with our handler method `HandleSuccess`
+```c#
+var request = Http.Get("http://www.mywebapi.com/user.json")
+    .OnSuccess(HandleSuccess)
+    .Send();
+```
+
+Parse the `response.Text` to the serialized class `User` that we declared earlier by using Unity's built in [JSONUtility](https://docs.unity3d.com/ScriptReference/JsonUtility.html)
+```c#
+private void HandleSuccess(HttpResponse response)
+{
+     var user = JsonUtility.FromJson<User>(response.Text);
+     Debug.Log(user.username);
+}
+```
