@@ -107,7 +107,7 @@ They are Headers that apply to all requests without having to manually include t
 * `Http.GetSuperHeaders()` returns `Dictionary<string, string>`
 
 
-## JSON response Example
+## JSON Response Example
 In this given example, the `response.Text` from `http://mywebapi.com/user.json` is:
 ```json
 {
