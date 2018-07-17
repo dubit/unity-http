@@ -19,7 +19,6 @@ It's recommended that you submodule this repo to your Assets directory using:
 
 This package is also part of <b>D</b>ubit <b>U</b>nity <b>C</b>omponent <b>K</b>it (<b>DUCK</b>) and can be installed via the [DUCK Package Manager](https://github.com/dubit/duck-package-manager). 
 
-
 ## How to use it.
 If you are using an AssemblyDefinition then reference the Http Assembly.  
 Import the namespace `using DUCK.Http;`
