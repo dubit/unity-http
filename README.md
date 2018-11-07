@@ -96,6 +96,7 @@ This has the following properties:
 * `ResponseType ResponseType`  
 * `byte[] Bytes`  
 * `string Text`  
+* `string Error`  
 * `Texture Texture`  
 * `Dictionary<string, string> ResponseHeaders`  
 
