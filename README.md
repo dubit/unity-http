@@ -72,6 +72,8 @@ All these methods return the HttpRequest instance.
 ##### Progress
 * `OnUploadProgress(Action<float> progress)`  
 * `OnDownloadProgress(Action<float> progress)`  
+##### Configure
+* `SetRedirectLimit(int redirectLimit)`   
 
 Progress events will invoke each time the progress value has increased, they are subject to Unity's documentation.
 * [Upload Progress Documentation](https://docs.unity3d.com/ScriptReference/Networking.UnityWebRequest-uploadProgress.html)
