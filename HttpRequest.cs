@@ -98,6 +98,17 @@ namespace DUCK.Http
 			return this;
 		}
 
+		/// <summary>
+		/// disable = 0
+		/// infinite = negative value
+		/// limit = positive value
+		/// </summary>
+		public HttpRequest SetRedirectLimit(int redirectLimit)
+		{
+			UnityWebRequest.redirectLimit = redirectLimit;
+			return this;
+		}
+
 		public void Abort()
 		{
 			Http.Instance.Abort(this);
