@@ -87,6 +87,12 @@ namespace DUCK.Http
 			return headers.Remove(key);
 		}
 
+		public HttpRequest SetTimeout(int duration)
+		{
+			unityWebRequest.timeout = duration;
+			return this;
+		}
+
 		public HttpRequest Send()
 		{
 			foreach (var header in headers)
