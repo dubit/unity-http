@@ -75,6 +75,9 @@ All these methods return the HttpRequest instance.
 ##### Configure
 * `SetRedirectLimit(int redirectLimit)`   
 
+Redirect limit subject to Unity's documentation.  
+* [Redirect Limit Documentation](https://docs.unity3d.com/ScriptReference/Networking.UnityWebRequest-redirectLimit.html)
+
 Progress events will invoke each time the progress value has increased, they are subject to Unity's documentation.
 * [Upload Progress Documentation](https://docs.unity3d.com/ScriptReference/Networking.UnityWebRequest-uploadProgress.html)
 * [Download Progress Documentation](https://docs.unity3d.com/ScriptReference/Networking.UnityWebRequest-downloadProgress.html)
