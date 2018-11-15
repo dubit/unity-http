@@ -87,6 +87,12 @@ namespace DUCK.Http
 			return headers.Remove(key);
 		}
 
+		public HttpRequest SetTimeout(int duration)
+		{
+			unityWebRequest.timeout = duration;
+			return this;
+		}
+
 		public HttpRequest Send()
 		{
 			foreach (var header in headers)
@@ -95,6 +101,12 @@ namespace DUCK.Http
 			}
 
 			Http.Instance.Send(this, onSuccess, onError, onNetworkError);
+			return this;
+		}
+
+		public HttpRequest SetRedirectLimit(int redirectLimit)
+		{
+			UnityWebRequest.redirectLimit = redirectLimit;
 			return this;
 		}
 

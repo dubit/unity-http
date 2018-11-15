@@ -72,6 +72,12 @@ All these methods return the HttpRequest instance.
 ##### Progress
 * `OnUploadProgress(Action<float> progress)`  
 * `OnDownloadProgress(Action<float> progress)`  
+##### Configure
+* `SetRedirectLimit(int redirectLimit)`   
+* `SetTimeout(int duration)`
+
+Redirect limit subject to Unity's documentation.  
+* [Redirect Limit Documentation](https://docs.unity3d.com/ScriptReference/Networking.UnityWebRequest-redirectLimit.html)
 
 Progress events will invoke each time the progress value has increased, they are subject to Unity's documentation.
 * [Upload Progress Documentation](https://docs.unity3d.com/ScriptReference/Networking.UnityWebRequest-uploadProgress.html)
@@ -94,6 +100,7 @@ This has the following properties:
 * `ResponseType ResponseType`  
 * `byte[] Bytes`  
 * `string Text`  
+* `string Error`  
 * `Texture Texture`  
 * `Dictionary<string, string> ResponseHeaders`  
 
