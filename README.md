@@ -74,6 +74,7 @@ All these methods return the HttpRequest instance.
 * `OnDownloadProgress(Action<float> progress)`  
 ##### Configure
 * `SetRedirectLimit(int redirectLimit)`   
+* `SetTimeout(int duration)`
 
 Redirect limit subject to Unity's documentation.  
 * [Redirect Limit Documentation](https://docs.unity3d.com/ScriptReference/Networking.UnityWebRequest-redirectLimit.html)
@@ -99,6 +100,7 @@ This has the following properties:
 * `ResponseType ResponseType`  
 * `byte[] Bytes`  
 * `string Text`  
+* `string Error`  
 * `Texture Texture`  
 * `Dictionary<string, string> ResponseHeaders`  
 

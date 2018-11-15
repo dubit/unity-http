@@ -14,6 +14,7 @@ namespace DUCK.Http
 		public ResponseType ResponseType { get; private set; }
 		public byte[] Bytes { get; private set; }
 		public string Text { get; private set; }
+		public string Error { get; private set; }
 		public Texture Texture { get; private set; }
 		public Dictionary<string, string> ResponseHeaders { get; private set; }
 
@@ -25,6 +26,7 @@ namespace DUCK.Http
 			IsSuccessful = !unityWebRequest.isHttpError && !unityWebRequest.isNetworkError;
 			IsHttpError = unityWebRequest.isHttpError;
 			IsNetworkError = unityWebRequest.isNetworkError;
+			Error = unityWebRequest.error;
 			StatusCode = unityWebRequest.responseCode;
 			ResponseType = HttpUtils.GetResponseType(StatusCode);
 			ResponseHeaders = unityWebRequest.GetResponseHeaders();
