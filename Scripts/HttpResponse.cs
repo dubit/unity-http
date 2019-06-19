@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace DUCK.Http
+namespace Duck.Http
 {
 	public class HttpResponse
 	{
@@ -11,7 +11,6 @@ namespace DUCK.Http
 		public bool IsHttpError { get; private set; }
 		public bool IsNetworkError { get; private set; }
 		public long StatusCode { get; private set; }
-		public ResponseType ResponseType { get; private set; }
 		public byte[] Bytes { get; private set; }
 		public string Text { get; private set; }
 		public string Error { get; private set; }
@@ -28,7 +27,6 @@ namespace DUCK.Http
 			IsNetworkError = unityWebRequest.isNetworkError;
 			Error = unityWebRequest.error;
 			StatusCode = unityWebRequest.responseCode;
-			ResponseType = HttpUtils.GetResponseType(StatusCode);
 			ResponseHeaders = unityWebRequest.GetResponseHeaders();
 
 			var downloadHandlerTexture = unityWebRequest.downloadHandler as DownloadHandlerTexture;

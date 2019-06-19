@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine.Networking;
 
-namespace DUCK.Http
+namespace Duck.Http
 {
 	public class HttpRequest
 	{
 		internal UnityWebRequest UnityWebRequest { get { return unityWebRequest; } }
+
+		public bool IsDone { get { return UnityWebRequest.isDone; } }
 
 		private readonly UnityWebRequest unityWebRequest;
 		private Dictionary<string, string> headers;

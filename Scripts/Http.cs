@@ -5,7 +5,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace DUCK.Http
+namespace Duck.Http
 {
 	public sealed class Http : MonoBehaviour
 	{
