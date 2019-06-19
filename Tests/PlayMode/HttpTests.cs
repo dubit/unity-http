@@ -33,7 +33,7 @@ namespace Duck.Http.Tests.PlayMode
 		}
 
 		[Test]
-		public void Expect_Super_Headers_Set_And_Get()
+		public void Expect_Set_Super_Headers()
 		{
 			const string HEADER_KEY = "HeaderKey";
 			const string HEADER_VALUE = "HeaderValue";
