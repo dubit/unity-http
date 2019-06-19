@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections;
-using Duck.Http.Tests.PlayMode;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 
-namespace Duck.Http.Tests
+namespace Duck.Http.Tests.PlayMode
 {
 	[TestFixture]
 	public class HttpTests
@@ -118,6 +117,25 @@ namespace Duck.Http.Tests
 
 			var request = Http.GetTexture(URI);
 			request.OnDownloadProgress(onDownloadProgress);
+			request.Send();
+
+			yield return new WaitForRequest(request);
+			yield return waitForEndOfFrame;
+
+			Assert.IsTrue(eventTriggered);
+		}
+		
+		[UnityTest]
+		public IEnumerator Expect_OnUploadProgress_Event()
+		{
+			const string URI = "http://www.google.com";
+
+			var eventTriggered = false;
+
+			Action<float> onUploadProgress = progress => eventTriggered = true;
+
+			var request = Http.Post(URI, string.Empty);
+			request.OnUploadProgress(onUploadProgress);
 			request.Send();
 
 			yield return new WaitForRequest(request);
