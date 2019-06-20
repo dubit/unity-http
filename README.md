@@ -11,7 +11,9 @@ The Http instance will run the WebRequest coroutines for you so you dont have to
 * Super headers
 
 ## Requirements
-Unity 2017.3 and above (Required for GetTexture, SendWebRequest() and Assembly Definitions).
+* Unity 2018.3+
+* .NET 4.5
+* C# 7
 
 ## Installation
 It's recommended that you submodule this repo to your Assets directory using:  
