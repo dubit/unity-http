@@ -2,11 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using Duck.Http.Service;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace Duck.Http.Unity
+namespace Duck.Http.Service.Unity
 {
 	public class UnityHttpService : IHttpService
 	{

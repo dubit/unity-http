@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Duck.Http.Service;
 using UnityEngine.Networking;
 
-namespace Duck.Http.Unity
+namespace Duck.Http.Service.Unity
 {
 	public class UnityHttpRequest : IHttpRequest
 	{

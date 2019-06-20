@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Duck.Http.Service;
-using Duck.Http.Unity;
+using Duck.Http.Service.Unity;
 using UnityEngine;
 using UnityEngine.Networking;
 
