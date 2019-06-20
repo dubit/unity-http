@@ -8,8 +8,6 @@ namespace Duck.Http
 	{
 		internal UnityWebRequest UnityWebRequest { get { return unityWebRequest; } }
 
-		public bool IsDone { get { return UnityWebRequest.isDone; } }
-
 		private readonly UnityWebRequest unityWebRequest;
 		private Dictionary<string, string> headers;
 
