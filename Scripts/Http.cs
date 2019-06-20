@@ -88,66 +88,79 @@ namespace Duck.Http
 
 		#region Static Requests
 
+		/// <see cref="Duck.Http.Service.IHttpService.Get"/>
 		public static IHttpRequest Get(string uri)
 		{
 			return Instance.service.Get(uri);
 		}
 
+		/// <see cref="Duck.Http.Service.IHttpService.GetTexture"/>
 		public static IHttpRequest GetTexture(string uri)
 		{
 			return Instance.service.GetTexture(uri);
 		}
 
+		/// <see cref="Duck.Http.Service.IHttpService.Post(string, string)"/>
 		public static IHttpRequest Post(string uri, string postData)
 		{
 			return Instance.service.Post(uri, postData);
 		}
 
+		/// <see cref="Duck.Http.Service.IHttpService.Post(string, WWWForm)"/>
 		public static IHttpRequest Post(string uri, WWWForm formData)
 		{
 			return Instance.service.Post(uri, formData);
 		}
 
+		/// <see cref="Duck.Http.Service.IHttpService.Post(string, Dictionary&lt;string, string&gt;)"/>
 		public static IHttpRequest Post(string uri, Dictionary<string, string> formData)
 		{
 			return Instance.service.Post(uri, formData);
 		}
 
+		/// <see cref="Duck.Http.Service.IHttpService.Post(string, List&lt;IMultipartFormSection&gt;)"/>
 		public static IHttpRequest Post(string uri, List<IMultipartFormSection> multipartForm)
 		{
 			return Instance.service.Post(uri, multipartForm);
 		}
 
+		/// <see cref="Duck.Http.Service.IHttpService.Post(string, byte[], string)"/>
 		public static IHttpRequest Post(string uri, byte[] bytes, string contentType)
 		{
 			return Instance.service.Post(uri, bytes, contentType);
 		}
 
+		/// <see cref="Duck.Http.Service.IHttpService.PostJson"/>
 		public static IHttpRequest PostJson(string uri, string json)
 		{
 			return Instance.service.PostJson(uri, json);
 		}
 
+		/// <see cref="Duck.Http.Service.IHttpService.PostJson{T}(string, T)"/>
 		public static IHttpRequest PostJson<T>(string uri, T payload) where T : class
 		{
 			return Instance.service.PostJson(uri, payload);
 		}
 
+		/// <see cref="Duck.Http.Service.IHttpService.Put(string, byte[])"/>
 		public static IHttpRequest Put(string uri, byte[] bodyData)
 		{
 			return Instance.service.Put(uri, bodyData);
 		}
 
+		/// <see cref="Duck.Http.Service.IHttpService.Put(string, string)"/>
 		public static IHttpRequest Put(string uri, string bodyData)
 		{
 			return Instance.service.Put(uri, bodyData);
 		}
 
+		/// <see cref="Duck.Http.Service.IHttpService.Delete"/>
 		public static IHttpRequest Delete(string uri)
 		{
 			return Instance.service.Delete(uri);
 		}
 
+		/// <see cref="Duck.Http.Service.IHttpService.Head"/>
 		public static IHttpRequest Head(string uri)
 		{
 			return Instance.service.Head(uri);
