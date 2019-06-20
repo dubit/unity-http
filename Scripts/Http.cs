@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
+using Duck.Http.Service;
+using Duck.Http.Unity;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -14,19 +15,30 @@ namespace Duck.Http
 			get
 			{
 				if (instance != null) return instance;
-				instance = new GameObject(typeof(Http).Name).AddComponent<Http>();
-				instance.gameObject.hideFlags = HideFlags.HideInHierarchy;
-				instance.superHeaders = new Dictionary<string, string>();
-				instance.httpRequests = new Dictionary<HttpRequest, Coroutine>();
-				DontDestroyOnLoad(instance.gameObject);
+				Init(new UnityHttpService());
 				return instance;
 			}
 		}
 
 		private static Http instance;
 
+		private IHttpService service;
 		private Dictionary<string, string> superHeaders;
-		private Dictionary<HttpRequest, Coroutine> httpRequests;
+		private Dictionary<IHttpRequest, Coroutine> httpRequests;
+
+		public static void Init(IHttpService service)
+		{
+			if (instance) return;
+
+			instance = new GameObject(typeof(Http).Name).AddComponent<Http>();
+			instance.gameObject.hideFlags = HideFlags.HideInHierarchy;
+			instance.superHeaders = new Dictionary<string, string>();
+			instance.httpRequests = new Dictionary<IHttpRequest, Coroutine>();
+			instance.service = service;
+			DontDestroyOnLoad(instance.gameObject);
+		}
+
+		#region Super Headers
 
 		/// <summary>
 		/// Super headers are key value pairs that will be added to every subsequent HttpRequest.
@@ -72,168 +84,95 @@ namespace Duck.Http
 			return Instance.superHeaders.Remove(key);
 		}
 
-		/// <summary>
-		/// Creates a HttpRequest configured for HTTP GET.
-		/// </summary>
-		/// <param name="uri">The URI of the resource to retrieve via HTTP GET.</param>
-		/// <returns>A HttpRequest object configured to retrieve data from uri.</returns>
-		public static HttpRequest Get(string uri)
+		#endregion
+
+		#region Static Requests
+
+		public static IHttpRequest Get(string uri)
 		{
-			return new HttpRequest(UnityWebRequest.Get(uri));
+			return Instance.service.Get(uri);
 		}
 
-		/// <summary>
-		/// Creates a HttpRequest configured for HTTP GET.
-		/// </summary>
-		/// <param name="uri">The URI of the resource to retrieve via HTTP GET.</param>
-		/// <returns>A HttpRequest object configured to retrieve data from uri.</returns>
-		public static HttpRequest GetTexture(string uri)
+		public static IHttpRequest GetTexture(string uri)
 		{
-			return new HttpRequest(UnityWebRequestTexture.GetTexture(uri));
+			return Instance.service.GetTexture(uri);
 		}
 
-		/// <summary>
-		/// Creates a HttpRequest configured to send form data to a server via HTTP POST.
-		/// </summary>
-		/// <param name="uri">The target URI to which form data will be transmitted.</param>
-		/// <param name="postData">Form body data. Will be URLEncoded via WWWTranscoder.URLEncode prior to transmission.</param>
-		/// <returns>A HttpRequest configured to send form data to uri via POST.</returns>
-		public static HttpRequest Post(string uri, string postData)
+		public static IHttpRequest Post(string uri, string postData)
 		{
-			return new HttpRequest(UnityWebRequest.Post(uri, postData));
+			return Instance.service.Post(uri, postData);
 		}
 
-		/// <summary>
-		/// Creates a HttpRequest configured to send form data to a server via HTTP POST.
-		/// </summary>
-		/// <param name="uri">The target URI to which form data will be transmitted.</param>
-		/// <param name="formData">Form fields or files encapsulated in a WWWForm object, for formatting and transmission to the remote server.</param>
-		/// <returns> A HttpRequest configured to send form data to uri via POST. </returns>
-		public static HttpRequest Post(string uri, WWWForm formData)
+		public static IHttpRequest Post(string uri, WWWForm formData)
 		{
-			return new HttpRequest(UnityWebRequest.Post(uri, formData));
+			return Instance.service.Post(uri, formData);
 		}
 
-		/// <summary>
-		/// Creates a HttpRequest configured to send form data to a server via HTTP POST.
-		/// </summary>
-		/// <param name="uri">The target URI to which form data will be transmitted.</param>
-		/// <param name="formData">Form fields in the form of a Key Value Pair, for formatting and transmission to the remote server.</param>
-		/// <returns>A HttpRequest configured to send form data to uri via POST.</returns>
-		public static HttpRequest Post(string uri, Dictionary<string, string> formData)
+		public static IHttpRequest Post(string uri, Dictionary<string, string> formData)
 		{
-			return new HttpRequest(UnityWebRequest.Post(uri, formData));
+			return Instance.service.Post(uri, formData);
 		}
 
-		/// <summary>
-		/// Creates a HttpRequest configured to send form multipart form to a server via HTTP POST.
-		/// </summary>
-		/// <param name="uri">The target URI to which form data will be transmitted.</param>
-		/// <param name="multipartForm">MultipartForm data for formatting and transmission to the remote server.</param>
-		/// <returns>A HttpRequest configured to send form data to uri via POST.</returns>
-		public static HttpRequest Post(string uri, List<IMultipartFormSection> multipartForm)
+		public static IHttpRequest Post(string uri, List<IMultipartFormSection> multipartForm)
 		{
-			return new HttpRequest(UnityWebRequest.Post(uri, multipartForm));
+			return Instance.service.Post(uri, multipartForm);
 		}
 
-		/// <summary>
-		/// Creates a HttpRequest configured to send raw bytes to a server via HTTP POST.
-		/// </summary>
-		/// <param name="uri">The target URI to which bytes will be transmitted.</param>
-		/// <param name="bytes">Byte array data.</param>
-		/// <param name="contentType">String representing the MIME type of the data (e.g. image/jpeg).</param>
-		/// <returns>A HttpRequest configured to send raw bytes to a server via POST.</returns>
-		public static HttpRequest Post(string uri, byte[] bytes, string contentType)
+		public static IHttpRequest Post(string uri, byte[] bytes, string contentType)
 		{
-			var unityWebRequest = new UnityWebRequest(uri, UnityWebRequest.kHttpVerbPOST)
-			{
-				uploadHandler = new UploadHandlerRaw(bytes)
-				{
-					contentType = contentType
-				},
-				downloadHandler = new DownloadHandlerBuffer()
-			};
-			return new HttpRequest(unityWebRequest);
+			return Instance.service.Post(uri, bytes, contentType);
 		}
 
-		/// <summary>
-		/// Creates a HttpRequest configured to send json data to a server via HTTP POST.
-		/// </summary>
-		/// <param name="uri">The target URI to which json data will be transmitted.</param>
-		/// <param name="json">Json body data.</param>
-		/// <returns>A HttpRequest configured to send json data to uri via POST.</returns>
-		public static HttpRequest PostJson(string uri, string json)
+		public static IHttpRequest PostJson(string uri, string json)
 		{
-			return Post(uri, Encoding.UTF8.GetBytes(json), "application/json");
+			return Instance.service.PostJson(uri, json);
 		}
 
-		/// <summary>
-		/// Creates a HttpRequest configured to send json data to a server via HTTP POST.
-		/// </summary>
-		/// <param name="uri">The target URI to which json data will be transmitted.</param>
-		/// <param name="payload">The object to be parsed to json data.</param>
-		/// <returns>A HttpRequest configured to send json data to uri via POST.</returns>
-		public static HttpRequest PostJson<T>(string uri, T payload) where T : class
+		public static IHttpRequest PostJson<T>(string uri, T payload) where T : class
 		{
-			return PostJson(uri, JsonUtility.ToJson(payload));
+			return Instance.service.PostJson(uri, payload);
 		}
 
-		/// <summary>
-		/// Creates a HttpRequest configured to upload raw data to a remote server via HTTP PUT.
-		/// </summary>
-		/// <param name="uri">The URI to which the data will be sent.</param>
-		/// <param name="bodyData">The data to transmit to the remote server.</param>
-		/// <returns>A HttpRequest configured to transmit bodyData to uri via HTTP PUT.</returns>
-		public static HttpRequest Put(string uri, byte[] bodyData)
+		public static IHttpRequest Put(string uri, byte[] bodyData)
 		{
-			return new HttpRequest(UnityWebRequest.Put(uri, bodyData));
+			return Instance.service.Put(uri, bodyData);
 		}
 
-		/// <summary>
-		/// Creates a HttpRequest configured to upload raw data to a remote server via HTTP PUT.
-		/// </summary>
-		/// <param name="uri">The URI to which the data will be sent.</param>
-		/// <param name="bodyData">The data to transmit to the remote server.
-		/// The string will be converted to raw bytes via &lt;a href="http:msdn.microsoft.comen-uslibrarysystem.text.encoding.utf8"&gt;System.Text.Encoding.UTF8&lt;a&gt;.</param>
-		/// <returns>A HttpRequest configured to transmit bodyData to uri via HTTP PUT.</returns>
-		public static HttpRequest Put(string uri, string bodyData)
+		public static IHttpRequest Put(string uri, string bodyData)
 		{
-			return new HttpRequest(UnityWebRequest.Put(uri, bodyData));
+			return Instance.service.Put(uri, bodyData);
 		}
 
-		/// <summary>
-		/// Creates a HttpRequest configured for HTTP DELETE.
-		/// </summary>
-		/// <param name="uri">The URI to which a DELETE request should be sent.</param>
-		/// <returns>A HttpRequest configured to send an HTTP DELETE request.</returns>
-		public static HttpRequest Delete(string uri)
+		public static IHttpRequest Delete(string uri)
 		{
-			return new HttpRequest(UnityWebRequest.Delete(uri));
+			return Instance.service.Delete(uri);
 		}
 
-		/// <summary>
-		/// Creates a HttpRequest configured to send a HTTP HEAD request.
-		/// </summary>
-		/// <param name="uri">The URI to which to send a HTTP HEAD request.</param>
-		/// <returns>A HttpRequest configured to transmit a HTTP HEAD request.</returns>
-		public static HttpRequest Head(string uri)
+		public static IHttpRequest Head(string uri)
 		{
-			return new HttpRequest(UnityWebRequest.Head(uri));
+			return Instance.service.Head(uri);
 		}
 
-		internal void Send(HttpRequest request, Action<HttpResponse> onSuccess = null,
+		#endregion
+
+		internal void Send(IHttpRequest request, Action<HttpResponse> onSuccess = null,
 			Action<HttpResponse> onError = null, Action<HttpResponse> onNetworkError = null)
 		{
-			var coroutine = StartCoroutine(SendCoroutine(request, onSuccess, onError, onNetworkError));
+			var enumerator = SendCoroutine(request, onSuccess, onError, onNetworkError);
+			var coroutine = StartCoroutine(enumerator);
 			httpRequests.Add(request, coroutine);
 		}
 
-		internal void Abort(HttpRequest request)
+		private IEnumerator SendCoroutine(IHttpRequest request, Action<HttpResponse> onSuccess = null,
+			Action<HttpResponse> onError = null, Action<HttpResponse> onNetworkError = null)
 		{
-			if (request.UnityWebRequest != null && !request.UnityWebRequest.isDone)
-			{
-				request.UnityWebRequest.Abort();
-			}
+			yield return service.Send(request, onSuccess, onError, onNetworkError);
+			Instance.httpRequests.Remove(request);
+		}
+
+		internal void Abort(IHttpRequest request)
+		{
+			Instance.service.Abort(request);
 
 			if (httpRequests.ContainsKey(request))
 			{
@@ -249,36 +188,6 @@ namespace Duck.Http
 			{
 				httpRequest.UpdateProgress();
 			}
-		}
-
-		private static IEnumerator SendCoroutine(HttpRequest request, Action<HttpResponse> onSuccess = null,
-			Action<HttpResponse> onError = null, Action<HttpResponse> onNetworkError = null)
-		{
-			var unityWebRequest = request.UnityWebRequest;
-			yield return unityWebRequest.SendWebRequest();
-
-			var response = new HttpResponse(unityWebRequest);
-
-			if (unityWebRequest.isNetworkError)
-			{
-				if (onNetworkError != null)
-				{
-					onNetworkError.Invoke(response);
-				}
-			}
-			else if (unityWebRequest.isHttpError)
-			{
-				if (onError != null)
-				{
-					onError.Invoke(response);
-				}
-			}
-			else if (onSuccess != null)
-			{
-				onSuccess.Invoke(response);
-			}
-
-			Instance.httpRequests.Remove(request);
 		}
 	}
 }
