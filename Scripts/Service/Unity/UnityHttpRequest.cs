@@ -4,7 +4,7 @@ using UnityEngine.Networking;
 
 namespace Duck.Http.Service.Unity
 {
-	public class UnityHttpRequest : IHttpRequest
+	public class UnityHttpRequest : IHttpRequest, IUpdateProgress
 	{
 		internal UnityWebRequest UnityWebRequest => unityWebRequest;
 

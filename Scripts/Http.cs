@@ -199,7 +199,7 @@ namespace Duck.Http
 		{
 			foreach (var httpRequest in httpRequests.Keys)
 			{
-				httpRequest.UpdateProgress();
+				(httpRequest as IUpdateProgress)?.UpdateProgress();
 			}
 		}
 	}

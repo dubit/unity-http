@@ -17,7 +17,6 @@ namespace Duck.Http.Service
 		IHttpRequest SetTimeout(int duration);
 		IHttpRequest Send();
 		IHttpRequest SetRedirectLimit(int redirectLimit);
-		void UpdateProgress();
 		void Abort();
 	}
 }
