@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine.Networking;
 
-namespace DUCK.Http
+namespace Duck.Http
 {
 	public class HttpRequest
 	{

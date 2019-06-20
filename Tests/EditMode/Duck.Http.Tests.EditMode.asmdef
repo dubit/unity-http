@@ -1,0 +1,14 @@
+{
+    "name": "Duck.Http.EditMode.Tests",
+    "references": [
+        "Duck.Http"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}
