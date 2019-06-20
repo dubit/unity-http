@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections;
-using NUnit.Framework;
-using UnityEngine;
-using UnityEngine.TestTools;
+﻿using NUnit.Framework;
 using Object = UnityEngine.Object;
 
 namespace Duck.Http.Tests.PlayMode
