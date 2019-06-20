@@ -1,5 +1,5 @@
 ﻿using NUnit.Framework;
-using Object = UnityEngine.Object;
+using UnityEngine;
 
 namespace Duck.Http.Tests.PlayMode
 {
