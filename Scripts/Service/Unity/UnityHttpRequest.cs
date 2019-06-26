@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine.Networking;
 
-namespace DUCK.Http
+namespace Duck.Http.Service.Unity
 {
-	public class HttpRequest
+	public class UnityHttpRequest : IHttpRequest, IUpdateProgress
 	{
-		internal UnityWebRequest UnityWebRequest { get { return unityWebRequest; } }
+		internal UnityWebRequest UnityWebRequest => unityWebRequest;
 
 		private readonly UnityWebRequest unityWebRequest;
-		private Dictionary<string, string> headers;
+		private readonly Dictionary<string, string> headers;
 
 		private event Action<float> onUploadProgress;
 		private event Action<float> onDownloadProgress;
@@ -20,13 +20,13 @@ namespace DUCK.Http
 		private float downloadProgress;
 		private float uploadProgress;
 
-		public HttpRequest(UnityWebRequest unityWebRequest)
+		public UnityHttpRequest(UnityWebRequest unityWebRequest)
 		{
 			this.unityWebRequest = unityWebRequest;
 			headers = new Dictionary<string, string>(Http.GetSuperHeaders());
 		}
 
-		public HttpRequest RemoveSuperHeaders()
+		public IHttpRequest RemoveSuperHeaders()
 		{
 			foreach (var kvp in Http.GetSuperHeaders())
 			{
@@ -36,13 +36,13 @@ namespace DUCK.Http
 			return this;
 		}
 
-		public HttpRequest SetHeader(string key, string value)
+		public IHttpRequest SetHeader(string key, string value)
 		{
 			headers[key] = value;
 			return this;
 		}
 
-		public HttpRequest SetHeaders(IEnumerable<KeyValuePair<string, string>> headers)
+		public IHttpRequest SetHeaders(IEnumerable<KeyValuePair<string, string>> headers)
 		{
 			foreach (var kvp in headers)
 			{
@@ -52,31 +52,31 @@ namespace DUCK.Http
 			return this;
 		}
 
-		public HttpRequest OnUploadProgress(Action<float> onProgress)
+		public IHttpRequest OnUploadProgress(Action<float> onProgress)
 		{
 			onUploadProgress += onProgress;
 			return this;
 		}
 
-		public HttpRequest OnDownloadProgress(Action<float> onProgress)
+		public IHttpRequest OnDownloadProgress(Action<float> onProgress)
 		{
 			onDownloadProgress += onProgress;
 			return this;
 		}
 
-		public HttpRequest OnSuccess(Action<HttpResponse> onSuccess)
+		public IHttpRequest OnSuccess(Action<HttpResponse> onSuccess)
 		{
 			this.onSuccess += onSuccess;
 			return this;
 		}
 
-		public HttpRequest OnError(Action<HttpResponse> onError)
+		public IHttpRequest OnError(Action<HttpResponse> onError)
 		{
 			this.onError += onError;
 			return this;
 		}
 
-		public HttpRequest OnNetworkError(Action<HttpResponse> onNetworkError)
+		public IHttpRequest OnNetworkError(Action<HttpResponse> onNetworkError)
 		{
 			this.onNetworkError += onNetworkError;
 			return this;
@@ -87,13 +87,13 @@ namespace DUCK.Http
 			return headers.Remove(key);
 		}
 
-		public HttpRequest SetTimeout(int duration)
+		public IHttpRequest SetTimeout(int duration)
 		{
 			unityWebRequest.timeout = duration;
 			return this;
 		}
 
-		public HttpRequest Send()
+		public IHttpRequest Send()
 		{
 			foreach (var header in headers)
 			{
@@ -104,10 +104,16 @@ namespace DUCK.Http
 			return this;
 		}
 
-		public HttpRequest SetRedirectLimit(int redirectLimit)
+		public IHttpRequest SetRedirectLimit(int redirectLimit)
 		{
 			UnityWebRequest.redirectLimit = redirectLimit;
 			return this;
+		}
+
+		public void UpdateProgress()
+		{
+			UpdateProgress(ref downloadProgress, unityWebRequest.downloadProgress, onDownloadProgress);
+			UpdateProgress(ref uploadProgress, unityWebRequest.uploadProgress, onUploadProgress);
 		}
 
 		public void Abort()
@@ -115,21 +121,12 @@ namespace DUCK.Http
 			Http.Instance.Abort(this);
 		}
 
-		internal void UpdateProgress()
-		{
-			UpdateProgress(ref downloadProgress, unityWebRequest.downloadProgress, onDownloadProgress);
-			UpdateProgress(ref uploadProgress, unityWebRequest.uploadProgress, onUploadProgress);
-		}
-
 		private void UpdateProgress(ref float currentProgress, float progress, Action<float> onProgress)
 		{
 			if (currentProgress < progress)
 			{
 				currentProgress = progress;
-				if (onProgress != null)
-				{
-					onProgress.Invoke(downloadProgress);
-				}
+				onProgress(downloadProgress);
 			}
 		}
 	}
