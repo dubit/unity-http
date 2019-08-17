@@ -125,7 +125,8 @@ namespace Duck.Http.Service.Unity
 		{
 			if (currentProgress < progress)
 			{
-				onProgress?.Invoke(currentProgress = progress);
+				currentProgress = progress
+				onProgress?.Invoke(currentProgress);
 			}
 		}
 	}
