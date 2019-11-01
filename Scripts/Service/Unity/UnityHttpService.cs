@@ -120,8 +120,8 @@ namespace Duck.Http.Service.Unity
 			return new HttpResponse
 			{
 				Url = unityWebRequest.url,
-				Bytes = unityWebRequest.downloadHandler.data,
-				Text = unityWebRequest.downloadHandler.text,
+				Bytes = unityWebRequest.downloadHandler?.data,
+				Text = unityWebRequest.downloadHandler?.text,
 				IsSuccessful = !unityWebRequest.isHttpError && !unityWebRequest.isNetworkError,
 				IsHttpError = unityWebRequest.isHttpError,
 				IsNetworkError = unityWebRequest.isNetworkError,
