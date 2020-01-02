@@ -1,0 +1,11 @@
+{
+  "name": "com.dubitlimited.duck.unity-http",
+  "displayName": "Unity Http",
+  "version": "2.2.1",
+  "description": "An improved API for making http requests in unity",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dubit/unity-http"
+  },
+  "author": "Dubit Limited"
+}

@@ -16,10 +16,16 @@ The Http instance will run the WebRequest coroutines for you so you dont have to
 * C# 7
 
 ## Installation
-It's recommended that you submodule this repo to your Assets directory using:  
-`git submodule add git@github.com:dubit/unity-http.git Assets/DUCK/Http`  
 
-This package is also part of <b>D</b>ubit <b>U</b>nity <b>C</b>omponent <b>K</b>it (<b>DUCK</b>) and can be installed via the [DUCK Package Manager](https://github.com/dubit/duck-package-manager). 
+Add it as a package using [Unity Package Manager](https://docs.unity3d.com/Manual/upm-git.html) or via submodule:  
+`git submodule add git@github.com:dubit/unity-http.git Assets/Duck/Http`
+
+## Releasing
+* Use [gitflow](https://nvie.com/posts/a-successful-git-branching-model/)
+* Create a release branch for the release
+* On that branch, bump version number in package json file, any other business (docs/readme updates)
+* Merge to master via pull request and tag the merge commit on master.
+* Merge back to development.#
 
 ## How to use it.
 If you are using an AssemblyDefinition then reference the Http Assembly.  
